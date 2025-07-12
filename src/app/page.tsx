@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,15 +11,17 @@ export default function Home() {
   const [value, setValue] = useState("");
   const trpc = useTRPC();
 
+  const router = useRouter();
+
   const {data: messages} = useQuery(trpc.messages.getMany.queryOptions());
 
-  const createMessage = useMutation(
-    trpc.messages.create.mutationOptions({
-      onSuccess: () => {
-        toast.success("Message created successfully!");
-      },
+  const createProject = useMutation(
+    trpc.projects.create.mutationOptions({
       onError: (error) => {
-        console.error("Error creating message:", error);
+        console.error("Error creating project:", error);
+      },
+      onSuccess: (data) => {
+        router.push(`/projects/${data.id}`);
       },
     })
   );
@@ -33,7 +36,7 @@ export default function Home() {
           placeholder="Type your message here..."
           className="my-4"
         />
-        <Button onClick={() => createMessage.mutate({ value: value })}>
+        <Button onClick={() => createProject.mutate({ value: value })}>
           Click Me
         </Button>
         {messages && (

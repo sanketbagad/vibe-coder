@@ -5,7 +5,6 @@ import {
   createNetwork,
   createTool,
   openai,
- type Tool,
 } from "@inngest/agent-kit";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { stdout } from "process";
@@ -13,10 +12,7 @@ import { z } from "zod";
 import { PROMPT } from "@/utils/prompts";
 import prisma from "@/lib/db";
 
-interface AgentState {
-  summary?: string;
-  files?: Record<string, string>;
-}
+
 
 export const codeAgent = inngest.createFunction(
   { id: "code.agent" },
@@ -27,7 +23,7 @@ export const codeAgent = inngest.createFunction(
       return sandbox.sandboxId;
     });
 
-    const agent = createAgent<AgentState>({
+    const agent = createAgent({
       name: "lovable-agent",
       description: "An Expert coding agent",
       system: PROMPT,
@@ -174,6 +170,7 @@ export const codeAgent = inngest.createFunction(
       if (isError) {
        return await prisma.message.create({
           data: {
+            projectId: event.data.projectId,
             content: "Error: Unable to generate a valid response.",
             role: "ASSISTANT",
             type: "ERROR",
@@ -182,6 +179,7 @@ export const codeAgent = inngest.createFunction(
       }
       return await prisma.message.create({
         data: {
+          projectId: event.data.projectId,
           content: result.state.data.summary as string,
           role: "ASSISTANT",
           type: "RESULT",
