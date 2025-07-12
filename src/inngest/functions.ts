@@ -5,22 +5,29 @@ import {
   createNetwork,
   createTool,
   openai,
+ type Tool,
 } from "@inngest/agent-kit";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { stdout } from "process";
 import { z } from "zod";
 import { PROMPT } from "@/utils/prompts";
+import prisma from "@/lib/db";
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+interface AgentState {
+  summary?: string;
+  files?: Record<string, string>;
+}
+
+export const codeAgent = inngest.createFunction(
+  { id: "code.agent" },
+  { event: "code-agent/run" },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("lovable-test-5");
       return sandbox.sandboxId;
     });
 
-    const agent = createAgent({
+    const agent = createAgent<AgentState>({
       name: "lovable-agent",
       description: "An Expert coding agent",
       system: PROMPT,
@@ -153,10 +160,40 @@ export const helloWorld = inngest.createFunction(
 
     const result = await network.run(event.data.value);
 
+    const isError =
+      !result.state.data.summary ||
+      Object.keys(result.state.data.files || {}).length === 0;
+
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
       const host = sandbox.getHost(3000);
       return `http://${host}`;
+    });
+
+    await step.run("save-result", async () => {
+      if (isError) {
+       return await prisma.message.create({
+          data: {
+            content: "Error: Unable to generate a valid response.",
+            role: "ASSISTANT",
+            type: "ERROR",
+          },
+        });
+      }
+      return await prisma.message.create({
+        data: {
+          content: result.state.data.summary as string,
+          role: "ASSISTANT",
+          type: "RESULT",
+          fragments: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              files: result.state.data.files || {},
+              title: "Fragment",
+            },
+          },
+        },
+      });
     });
 
     await step.sleep("wait-a-moment", "1s");
