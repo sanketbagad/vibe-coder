@@ -3,8 +3,27 @@ import prisma from "@/lib/db";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
 import { generateSlug } from "random-word-slugs";
+import { TRPCError } from "@trpc/server";
 
 export const ProjectsRouter = createTRPCRouter({
+  getOne: baseProcedure
+    .input(
+      z.object({
+        id: z.string().min(1, "Project ID cannot be empty"),
+      })
+    )
+    .query(async ({ input }) => {
+      const project = await prisma.project.findUnique({
+        where: { id: input.id },
+      });
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Project with ID ${input.id} not found`,
+        });
+      }
+      return project;
+    }),
   getMany: baseProcedure.query(async () => {
     const projects = await prisma.project.findMany({
       orderBy: { updatedAt: "desc" },
@@ -15,7 +34,10 @@ export const ProjectsRouter = createTRPCRouter({
   create: baseProcedure
     .input(
       z.object({
-        value: z.string().min(1, "Message cannot be empty").max(10000, "Message is too long"),
+        value: z
+          .string()
+          .min(1, "Message cannot be empty")
+          .max(10000, "Message is too long"),
       })
     )
     .mutation(async ({ input }) => {
