@@ -17,6 +17,7 @@ import { CodeIcon, CrownIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CodeView } from "@/components/code-view";
+import { FileExplorer } from "@/components/file-explorer";
 
 interface ProjectViewProps {
   projectId: string;
@@ -72,11 +73,12 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
             <TabsContent value="preview">
               {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
-            <TabsContent value="code">
-              <CodeView
-                lang="ts"
-                code="// This is a placeholder for the code view. Replace with actual code."
-              />
+            <TabsContent value="code" className="min-h-0">
+              {!!activeFragment?.files && (
+                <FileExplorer
+                  files={activeFragment.files as { [path: string]: string }}
+                />
+              )}
             </TabsContent>
           </Tabs>
         </ResizablePanel>
