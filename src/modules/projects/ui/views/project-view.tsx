@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CodeIcon, CrownIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { CodeView } from "@/components/code-view";
 
 interface ProjectViewProps {
   projectId: string;
@@ -72,9 +73,10 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
               {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
             <TabsContent value="code">
-              <p>
-                Code view is under development. Stay tuned for updates!
-              </p>
+              <CodeView
+                lang="ts"
+                code="// This is a placeholder for the code view. Replace with actual code."
+              />
             </TabsContent>
           </Tabs>
         </ResizablePanel>
