@@ -38,7 +38,7 @@ export const MessageLoading = () => {
     <div className="flex flex-col group px-2 pb-4">
       <div className="flex items-center gap-2 pt-2 mb-2">
         <Image
-          src="/logo.svg"
+          src="/bot.svg"
           alt="Vibing"
           width={18}
           height={18}

@@ -11,6 +11,7 @@ import { MessagesContainer } from "../components/messages-container";
 import { Suspense, useState } from "react";
 import { Fragment } from "@/generated/prisma";
 import { ProjectHeader } from "../components/project-header";
+import { FragmentWeb } from "../components/fragment-web";
 
 interface ProjectViewProps {
   projectId: string;
@@ -30,15 +31,16 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
             <ProjectHeader projectId={projectId} />
           </Suspense>
           <Suspense fallback={<div>Loading messages...</div>}>
-            <MessagesContainer projectId={projectId}
-            activeFragment={activeFragment}
-            setActiveFragment={setActiveFragment}
+            <MessagesContainer
+              projectId={projectId}
+              activeFragment={activeFragment}
+              setActiveFragment={setActiveFragment}
             />
           </Suspense>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={65} minSize={20}>
-          Todo: Preview
+          {!!activeFragment && <FragmentWeb data={activeFragment} />}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
