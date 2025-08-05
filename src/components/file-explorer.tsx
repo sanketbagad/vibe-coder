@@ -4,6 +4,8 @@ import { Hint } from "./hints";
 import { Button } from "@/components/ui/button";
 import { CodeView } from "./code-view";
 import { ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
+import { convertFilesToTreeItems } from "@/lib/utils";
+import { TreeView } from "./tree-view";
 
 type FileCollection = { [path: string]: string };
 
@@ -24,10 +26,24 @@ export const FileExplorer = (props: FileExplorerProps) => {
     return fileKeys.length > 0 ? fileKeys[0] : null;
   });
 
+  const treeData = useMemo(() => {
+    return convertFilesToTreeItems(files);
+  }, [files]);
+
+  const handleFileSelect = useCallback((filePath: string) => {
+    if (files[filePath]) {
+      setSelectedFile(filePath);
+    }
+  }, [files]);
+
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={30} minSize={30} className="bg-sidebar">
-        <p>Todo: Implement file explorer UI</p>
+       <TreeView
+        data={treeData}
+        onSelect={handleFileSelect}
+        value={selectedFile || ""}
+       />
       </ResizablePanel>
       <ResizablePanel className="hover:bg-primary transition-colors" />
       <ResizablePanel defaultSize={70} minSize={30} className="bg-background">
