@@ -33,7 +33,6 @@ export const FileBreadcrumb = ({ filePath }: FileBreadcrumbProps) => {
     if (pathSegments.length <= maxSegments) {
       return pathSegments.map((segment, index) => {
         const isLast = index === pathSegments.length - 1;
-
         return (
           <Fragment key={index}>
             <BreadcrumbItem>

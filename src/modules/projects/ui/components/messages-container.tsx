@@ -10,27 +10,38 @@ import { MessageLoading } from "./message-loading";
 
 interface MessagesContainerProps {
   projectId: string;
-  activeFragment: Fragment| null;
+  activeFragment: Fragment | null;
   setActiveFragment: (fragment: Fragment | null) => void;
 }
 
-export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment }: MessagesContainerProps) => {
+export const MessagesContainer = ({
+  projectId,
+  activeFragment,
+  setActiveFragment,
+}: MessagesContainerProps) => {
   const trpc = useTRPC();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastAssistantMessageIdRef = useRef<string | null>(null);
   const { data: messages } = useSuspenseQuery(
-    trpc.messages.getMany.queryOptions({ projectId }, {
-      refetchInterval: 5000, // Refetch every 5 seconds
-    })
+    trpc.messages.getMany.queryOptions(
+      { projectId },
+      {
+        refetchInterval: 5000, // Refetch every 5 seconds
+      }
+    )
   );
 
   useEffect(() => {
-    const lastAssistantMessage = messages.findLast(
-      (message) => message.role === "ASSISTANT" && !!message.fragments
+    const lastMessage = messages.findLast(
+      (message) => message.role === "ASSISTANT"
     );
-    if (lastAssistantMessage) {
-      setActiveFragment(lastAssistantMessage.fragments);
+    if (
+      lastMessage?.fragments &&
+      lastMessage.id !== lastAssistantMessageIdRef.current
+    ) {
+      setActiveFragment(lastMessage.fragments);
+      lastAssistantMessageIdRef.current = lastMessage.id;
     }
-
   }, [messages, setActiveFragment]);
 
   useEffect(() => {
@@ -44,21 +55,19 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="pt-2 pr-1">
           {messages.map((message) => (
-            <MessageCard 
-            key={message.id}
-            content={message.content}
-            role={message.role}
-            fragment={message.fragments}
-            createdAt={message.createdAt}
-            isActiveFragment={activeFragment?.id === message.fragments?.id}
-            onFragmentClick={() => setActiveFragment(message.fragments)}
-            type={message.type}
+            <MessageCard
+              key={message.id}
+              content={message.content}
+              role={message.role}
+              fragment={message.fragments}
+              createdAt={message.createdAt}
+              isActiveFragment={activeFragment?.id === message.fragments?.id}
+              onFragmentClick={() => setActiveFragment(message.fragments)}
+              type={message.type}
             />
           ))}
         </div>
-        {isLastMessageUser && (
-         <MessageLoading />
-        )}
+        {isLastMessageUser && <MessageLoading />}
         <div ref={bottomRef} className="h-4" />
       </div>
       <div className="relative p-3 pt-1">
