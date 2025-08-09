@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Botbyte.build",
+  title: "Botbyte Builder",
   description: "Build with Botbyte AI",
 };
 
