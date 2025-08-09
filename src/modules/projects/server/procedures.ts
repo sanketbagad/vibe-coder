@@ -46,6 +46,7 @@ export const ProjectsRouter = createTRPCRouter({
       try {
         await consumeCredits();
       } catch (error) {
+        console.error("Error consuming credits:", error);
         if (error instanceof Error) {
           throw new TRPCError({
             code: "BAD_REQUEST",

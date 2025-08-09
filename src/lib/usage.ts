@@ -11,6 +11,8 @@ export async function getUsageTracker() {
     const { has } = await auth();
     const hasPremium = has({ plan: "pro" });
 
+    console.error(hasPremium)
+
   const rateLimiter = new RateLimiterPrisma({
     storeClient: prisma,
     tableName: "Usage",
@@ -28,6 +30,8 @@ export async function consumeCredits() {
   }
 
   const usageTracker = await getUsageTracker();
+
+  console.log("reached usage tracker");
 
   const result = await usageTracker.consume(userId, GENERATION_COST);
 

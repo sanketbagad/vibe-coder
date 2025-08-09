@@ -11,7 +11,11 @@ import {
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { stdout } from "process";
 import { z } from "zod";
-import { PROMPT } from "@/utils/prompts";
+import {
+  FRAGMENT_TITLE_PROMPT,
+  PROMPT,
+  RESPONSE_PROMPT,
+} from "@/utils/prompts";
 import prisma from "@/lib/db";
 
 export const codeAgent = inngest.createFunction(
@@ -191,6 +195,28 @@ export const codeAgent = inngest.createFunction(
 
     const result = await network.run(event.data.value, { state });
 
+    const fragmentTitleGenerator = createAgent({
+      name: "fragment-title-generator",
+      description: "Generates a short title for code fragments",
+      system: FRAGMENT_TITLE_PROMPT,
+      model: openai({
+        model: "gpt-4o",
+      }),
+    });
+
+    const responseGenerator = createAgent({
+      name: "response-generator",
+      description:
+        "Generates a user-friendly response based on the task summary",
+      system: RESPONSE_PROMPT,
+      model: openai({
+        model: "gpt-4o",
+      }),
+    });
+
+    const { output: fragmentTitle } = await fragmentTitleGenerator.run(result.state.data.summary)
+    const { output: response } = await responseGenerator.run(result.state.data.summary);
+
     const isError =
       !result.state.data.summary ||
       Object.keys(result.state.data.files || {}).length === 0;
@@ -215,14 +241,14 @@ export const codeAgent = inngest.createFunction(
       return await prisma.message.create({
         data: {
           projectId: event.data.projectId,
-          content: result.state.data.summary as string,
+          content: response[0].type === "text" ? response[0].content as string : "Here you go!",
           role: "ASSISTANT",
           type: "RESULT",
           fragments: {
             create: {
               sandboxUrl: sandboxUrl,
               files: result.state.data.files || {},
-              title: "Fragment",
+              title: fragmentTitle[0].type === "text" ? fragmentTitle[0].content as string : "Fragment",
             },
           },
         },
