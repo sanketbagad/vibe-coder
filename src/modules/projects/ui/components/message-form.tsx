@@ -9,8 +9,10 @@ import { useState } from "react";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { UsageInfo } from "./usage";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   value: z
@@ -21,7 +23,6 @@ const formSchema = z.object({
 
 export function MessageForm({ projectId }: any) {
   const [isFocused, setIsFocused] = useState(false);
-  const showUsage = false; // Replace with actual logic to determine if usage should be shown
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,21 +32,33 @@ export function MessageForm({ projectId }: any) {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const createMessage = useMutation(trpc.messages.create.mutationOptions({
-    onSuccess: () => {
-      form.reset();
-      queryClient.invalidateQueries(
-        trpc.messages.getMany.queryOptions({ projectId })
-      );
-    },
+  const { data: usage } = useQuery(trpc.usage.status.queryOptions());
 
-    onError: (error) => {
-      toast.error(`Error creating message: ${error.message}`, {
-        description: "Please try again later.",
-      });
-    },
-  }));
+  const showUsage = !!usage;
+
+  const createMessage = useMutation(
+    trpc.messages.create.mutationOptions({
+      onSuccess: () => {
+        form.reset();
+        queryClient.invalidateQueries(
+          trpc.messages.getMany.queryOptions({ projectId })
+        );
+        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
+      },
+
+      onError: (error) => {
+        toast.error(`Error creating message: ${error.message}`, {
+          description: "Please try again later.",
+        });
+
+        if (error.data?.code === "TOO_MANY_REQUESTS") {
+          router.push("/pricing");
+        }
+      },
+    })
+  );
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     // Call the create message mutation here
@@ -56,6 +69,12 @@ export function MessageForm({ projectId }: any) {
   const isDisabled = isPending || !form.formState.isValid;
   return (
     <Form {...form}>
+      {showUsage && (
+        <UsageInfo
+          points={usage.remainingPoints}
+          msBeforeNext={usage.msBeforeNext}
+        />
+      )}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
@@ -99,15 +118,14 @@ export function MessageForm({ projectId }: any) {
             className={cn(
               "size-8 rounded-full",
               isDisabled && "bg-muted-foreground border"
-            )} type="submit">
-              {
-                isPending ? (
-                  <Loader2Icon className="size-4 animate-spin" />
-                ) : (
-                   <ArrowUpIcon className="size-4" />
-                )
-              }
-          
+            )}
+            type="submit"
+          >
+            {isPending ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <ArrowUpIcon className="size-4" />
+            )}
           </Button>
         </div>
       </form>
