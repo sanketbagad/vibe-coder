@@ -39,6 +39,7 @@ export const codeAgent = inngest.createFunction(
           orderBy: {
             createdAt: "desc",
           },
+          take: 5
         });
         for (const message of messages) {
           formattedMessages.push({
@@ -47,7 +48,7 @@ export const codeAgent = inngest.createFunction(
             content: message.content,
           });
         }
-        return formattedMessages;
+        return formattedMessages.reverse(); // Reverse to maintain chronological order
       }
     );
 
