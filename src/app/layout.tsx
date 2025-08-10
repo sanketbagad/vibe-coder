@@ -21,14 +21,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Botbyte Builder - AI-Powered Website Builder",
+    default: "Botbyte Builder - AI-Powered Website Builder by Sanket Bagad",
     template: "%s | Botbyte Builder"
   },
   description: "Build stunning websites in minutes with Botbyte AI. Create professional, responsive websites using artificial intelligence. No coding required - just describe your vision and watch it come to life.",
-  keywords: ["AI website builder", "website creator", "no code", "artificial intelligence", "web design", "responsive websites", "Botbyte"],
-  authors: [{ name: "Botbyte Team" }],
-  creator: "Botbyte",
-  publisher: "Botbyte",
+  keywords: ["AI website builder", "sanket bagad", "website creator", "no code", "artificial intelligence", "web design", "responsive websites", "Botbyte"],
+  authors: [{ name: "Sanket Bagad", url: "https://twitter.com/sarcastic_sb" }],
+  creator: "Sanket Bagad",
+  publisher: "Sanket Bagad",
   formatDetection: {
     email: false,
     address: false,
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     title: "Botbyte Builder - AI-Powered Website Builder",
     description: "Build stunning websites in minutes with Botbyte AI. No coding required.",
     images: ["/og-image.png"],
-    creator: "@botbyte",
+    creator: "@sarcastic_sb",
   },
   robots: {
     index: true,
