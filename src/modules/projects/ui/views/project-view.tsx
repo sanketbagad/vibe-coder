@@ -20,6 +20,7 @@ import { CodeView } from "@/components/code-view";
 import { FileExplorer } from "@/components/file-explorer";
 import { UserControl } from "@/components/user-control";
 import { useAuth } from "@clerk/nextjs";
+import { ErrorBoundary } from "react-error-boundary";
 
 interface ProjectViewProps {
   projectId: string;
@@ -38,9 +39,12 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
           minSize={20}
           className="flex flex-col min-h-0"
         >
+          <ErrorBoundary fallback={<div>Something went wrong while loading the project header.</div>}>
           <Suspense fallback={<div>Loading project header...</div>}>
             <ProjectHeader projectId={projectId} />
           </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary fallback={<div>Something went wrong while loading the project header.</div>}>
           <Suspense fallback={<div>Loading messages...</div>}>
             <MessagesContainer
               projectId={projectId}
@@ -48,6 +52,7 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
               setActiveFragment={setActiveFragment}
             />
           </Suspense>
+          </ErrorBoundary>
         </ResizablePanel>
         <ResizableHandle className="hover:bg-primary transition-colors" />
         <ResizablePanel defaultSize={65} minSize={20}>
