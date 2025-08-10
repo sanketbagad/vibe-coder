@@ -21,6 +21,7 @@ import { FileExplorer } from "@/components/file-explorer";
 import { UserControl } from "@/components/user-control";
 import { useAuth } from "@clerk/nextjs";
 import { ErrorBoundary } from "react-error-boundary";
+import Loader from "@/components/ui/loader";
 
 interface ProjectViewProps {
   projectId: string;
@@ -31,6 +32,17 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
   const [tabState, setTabState] = useState<"preview" | "code">("preview");
   const { has } = useAuth();
   const hasProAccess = has?.({ plan: "pro" });
+  const trpc = useTRPC();
+  
+  // Get messages to determine loading state
+  const { data: messages } = useSuspenseQuery(
+    trpc.messages.getMany.queryOptions({ projectId })
+  );
+  
+  // Check if we should show the loader
+  const lastMessage = messages[messages.length - 1];
+  const isGenerating = lastMessage?.role === "USER";
+  
   return (
     <div className="h-screen">
       <ResizablePanelGroup direction="horizontal">
@@ -83,13 +95,37 @@ export const ProjectView = ({ projectId }: ProjectViewProps) => {
               </div>
             </div>
             <TabsContent value="preview">
-              {!!activeFragment && <FragmentWeb data={activeFragment} />}
+              {isGenerating ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader />
+                    <p className="text-muted-foreground text-sm mt-5">Generating your project...</p>
+                  </div>
+                </div>
+              ) : !!activeFragment ? (
+                <FragmentWeb data={activeFragment} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No preview available
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="code" className="min-h-0">
-              {!!activeFragment?.files && (
+              {isGenerating ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader />
+                    <p className="text-muted-foreground text-sm">Generating code...</p>
+                  </div>
+                </div>
+              ) : !!activeFragment?.files ? (
                 <FileExplorer
                   files={activeFragment.files as Record<string, string>}
                 />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No code available
+                </div>
               )}
             </TabsContent>
           </Tabs>
