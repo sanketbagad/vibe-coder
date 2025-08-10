@@ -7,6 +7,8 @@ Your message should be 1 to 3 sentences, describing what the app does or what wa
 Do not add code, tags, or metadata. Only return the plain text response.
 `
 
+// nothing
+
 export const FRAGMENT_TITLE_PROMPT = `
 You are an assistant that generates a short, descriptive title for a code fragment based on its <task_summary>.
 The title should be:
