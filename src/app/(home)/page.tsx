@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AI Website Builder - Create Stunning Websites in Minutes",
     description: "Build professional websites effortlessly with Botbyte AI. No coding skills required.",
-    images: ["/og-home.png"],
+    images: ["/og-image.png"],
   },
   twitter: {
     title: "AI Website Builder - Create Stunning Websites in Minutes",
     description: "Build professional websites effortlessly with Botbyte AI. No coding skills required.",
-    images: ["/twitter-home.png"],
+    images: ["/og-image.png"],
   },
   alternates: {
     canonical: "/",
