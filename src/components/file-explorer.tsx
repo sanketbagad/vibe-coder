@@ -86,24 +86,27 @@ interface FileExplorerProps {
 export const FileExplorer = (props: FileExplorerProps) => {
   const { files } = props;
 
+  // Ensure files is a valid object
+  const validFiles = files && typeof files === 'object' ? files : {};
+
   const [copied, setCopied] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<string | null>(() => {
-    const fileKeys = Object.keys(files);
+    const fileKeys = Object.keys(validFiles);
     return fileKeys.length > 0 ? fileKeys[0] : null;
   });
 
   const treeData = useMemo(() => {
-    return convertFilesToTreeItems(files);
-  }, [files]);
+    return convertFilesToTreeItems(validFiles);
+  }, [validFiles]);
 
   const handleFileSelect = useCallback(
     (filePath: string) => {
-      if (files[filePath]) {
+      if (validFiles[filePath]) {
         setSelectedFile(filePath);
       }
     },
-    [files]
+    [validFiles]
   );
 
   const handleCopy = useCallback(() => {
@@ -125,7 +128,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
       </ResizablePanel>
       <ResizablePanel className="hover:bg-primary transition-colors" />
       <ResizablePanel defaultSize={70} minSize={30} className="bg-background">
-        {selectedFile && files[selectedFile] ? (
+        {selectedFile && validFiles[selectedFile] ? (
           <div className="h-full w-full flex flex-col">
             <div className="border=b bg-sidebar py-4 flex justify-between items-center px-4 gap-x-2">
               <FileBreadcrumb filePath={selectedFile} />
@@ -142,7 +145,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
             </div>
             <div className="flex-1 overflow-auto">
               <CodeView
-                code={files[selectedFile]}
+                code={validFiles[selectedFile]}
                 lang={getLanguageFromExtension(selectedFile)}
               />
             </div>

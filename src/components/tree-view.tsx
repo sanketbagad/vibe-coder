@@ -62,14 +62,14 @@ interface TreeProps {
 
 const Tree = ({ item, onSelectValue, onSelect, parentPath }: TreeProps) => {
   const [name, ...items] = Array.isArray(item) ? item : [item];
-  const currentPath: any = parentPath ? `${parentPath}/${name}` : name;
+  const currentPath = parentPath ? `${parentPath}/${name}` : name;
 
   if (items.length === 0) {
     const isSelected = onSelectValue === currentPath;
     return (
       <SidebarMenuButton
         isActive={isSelected}
-        className="data-[active=true]:bg-transparent"
+        className="data-[active=true]:bg-transparent cursor-pointer"
         onClick={() => onSelect?.(currentPath)}
       >
         <FileIcon />

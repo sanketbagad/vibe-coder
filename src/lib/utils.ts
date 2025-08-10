@@ -23,16 +23,17 @@ export function convertFilesToTreeItems(files: {
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      if (!currentNode[part]) {
-        currentNode[part] = {};
+      if (i === parts.length - 1) {
+        // This is a file (last part of the path)
+        currentNode[part] = null;
+      } else {
+        // This is a directory
+        if (!currentNode[part]) {
+          currentNode[part] = {};
+        }
+        currentNode = currentNode[part] as TreeNode;
       }
-
-      currentNode = currentNode[part] as TreeNode;
     }
-
-    const fileName = parts[parts.length - 1];
-
-    currentNode[fileName] = null; // Mark as a file
   }
   function buildTree(node: TreeNode): TreeItem[] {
     const children: TreeItem[] = [];
